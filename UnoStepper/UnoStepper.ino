@@ -32,6 +32,9 @@ int motorSpeed = 9600;
 int motorAccel = 80000;
 int ONE_REV = 1600;
 
+boolean paused = false;
+boolean oscillate = false;
+
 void setup() { 
   Serial.begin(9600);
   
@@ -44,23 +47,63 @@ void setup() {
   stepper.setMaxSpeed(motorSpeed);
   stepper.setSpeed(motorSpeed);
   stepper.setAcceleration(motorAccel);
+  
+  // Go home
+  stepper.moveTo(0);
 }
 
 void loop() { 
-  // Switch the direction every so often
-  currentMillis = millis();
-  if (currentMillis - prevMillis > SWITCH_INTERVAL_MS) {
-    Serial.println("SWITCH");
-    switchStepper();
-    stepper.moveTo(stepperDirection * 1 * ONE_REV);
+  // Take serial input
+  if (Serial.available() > 0) {
+    int inChar = Serial.read();
+    if (inChar == 's') {
+      // Start or stop motion
+      paused = !paused;
+      Serial.print("Moving: ");
+      Serial.println(!paused);
+    } else if (inChar == 'h') {
+      // Go home
+      stepper.moveTo(0);
+    } else if (inChar == 'l') {
+      // Move left
+      stepperDirection = 1;
+      moveRevs(0.5);
+    } else if (inChar == 'r') {
+      // Move right
+      stepperDirection = -1;
+      moveRevs(0.5);        
+    } else if (inChar == 'o') {
+      oscillate = !oscillate;
+      Serial.print("TOGGLE OSCILLATION: ");
+      Serial.println(oscillate);
+    }
   }
   
-  // Must be called as often as possible
-  stepper.run();
+  // Switch the direction every so often
+  currentMillis = millis();
+  if (!paused) {
+    if (oscillate && stepperDone()) {
+      stepperDirection = -1 * stepperDirection;
+      moveRevs(1);  
+    }
+  
+    // Must be called as often as possible
+    stepper.run();  
+  }
+}
+
+boolean stepperDone() {
+  return (stepper.distanceToGo() == 0.0); 
 }
 
 /**
- * @Deprecated
+ * Move the stepper by revolutions
+ */
+void moveRevs(float revs) {
+  stepper.move(revs * ONE_REV * stepperDirection);
+}
+
+/**
  * Switch the direction of the stepper
  */
 void switchStepper() {
