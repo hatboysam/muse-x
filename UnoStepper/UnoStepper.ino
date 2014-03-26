@@ -1,3 +1,5 @@
+#include <Adafruit_MotorShield.h>
+#include <Wire.h>
 #include <AccelStepper.h>
 #include <Servo.h>
 
@@ -28,8 +30,8 @@ int currentMillis = 0;
  * Stepper Constants
  */
 int SWITCH_INTERVAL_MS = 1000;
-int motorSpeed = 9600;
-int motorAccel = 80000;
+int motorSpeed = 40000;
+int motorAccel = 90000;
 int ONE_REV = 1600;
 
 boolean paused = false;
@@ -84,7 +86,7 @@ void loop() {
   if (!paused) {
     if (oscillate && stepperDone()) {
       stepperDirection = -1 * stepperDirection;
-      moveRevs(1);  
+      moveRevs(2);  
     }
   
     // Must be called as often as possible
