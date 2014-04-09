@@ -41,9 +41,9 @@ void loop() {
   if (Serial.available() > 0) {
     int inChar = Serial.read();
     if (inChar == 'l') {
-      myMotor->step(200, FORWARD, DOUBLE);
+      myMotor->step(400, FORWARD, DOUBLE);
     } else if (inChar == 'r') {
-      myMotor->step(200, BACKWARD, DOUBLE);
+      myMotor->step(400, BACKWARD, DOUBLE);
     }
   }  
   //myMotor->step(100, FORWARD, DOUBLE);
