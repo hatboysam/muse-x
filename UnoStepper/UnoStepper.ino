@@ -7,6 +7,7 @@
  * Servo motor control 
  **/
 Servo servo1;
+int servopin = A0;
 
 /**
  * Stepper Control
@@ -30,7 +31,7 @@ int currentMillis = 0;
  * Stepper Constants
  */
 int SWITCH_INTERVAL_MS = 1000;
-int motorSpeed = 40000;
+int motorSpeed = 40000; // Steps per second
 int motorAccel = 90000;
 int ONE_REV = 1600;
 
@@ -49,6 +50,9 @@ void setup() {
   stepper.setMaxSpeed(motorSpeed);
   stepper.setSpeed(motorSpeed);
   stepper.setAcceleration(motorAccel);
+  
+  // Set up servo
+  servo1.attach(14);
   
   // Go home
   stepper.moveTo(0);
@@ -86,6 +90,12 @@ void loop() {
   if (!paused) {
     if (oscillate && stepperDone()) {
       stepperDirection = -1 * stepperDirection;
+      // Move the pick
+      if (stepperDirection < 0) {
+        servo1.write(90);
+      } else {
+        servo1.write(0);
+      }
       moveRevs(2);  
     }
   
