@@ -3,6 +3,11 @@
 #include <AccelStepper.h>
 #include <Servo.h>
 
+/**
+ * Phone Jack
+ */
+ int phonepin = 9;
+
 /** 
  * Servo motor control 
  **/
@@ -35,6 +40,13 @@ int motorSpeed = 40000; // Steps per second
 int motorAccel = 90000;
 int ONE_REV = 1600;
 
+/**
+ * Other
+ */
+ int inChar;
+ int prevPhone = LOW;
+ int currPhone = LOW;
+
 boolean paused = false;
 boolean oscillate = false;
 
@@ -56,12 +68,23 @@ void setup() {
   
   // Go home
   stepper.moveTo(0);
+  
+  // Phone
+  pinMode(phonepin, INPUT_PULLUP);
 }
 
 void loop() { 
+  // Check for phone input
+  prevPhone = currPhone;
+  currPhone = digitalRead(phonepin);
+  if (currPhone == LOW && prevPhone == HIGH) {
+    Serial.println("SLAP DA BUTTON");
+    moveRevs(2.0);
+  }
+  
   // Take serial input
   if (Serial.available() > 0) {
-    int inChar = Serial.read();
+    inChar = Serial.read();
     if (inChar == 's') {
       // Start or stop motion
       paused = !paused;
@@ -73,11 +96,11 @@ void loop() {
     } else if (inChar == 'l') {
       // Move left
       stepperDirection = 1;
-      moveRevs(0.5);
+      moveRevs(2.0);
     } else if (inChar == 'r') {
       // Move right
       stepperDirection = -1;
-      moveRevs(0.5);        
+      moveRevs(2.0);        
     } else if (inChar == 'o') {
       oscillate = !oscillate;
       Serial.print("TOGGLE OSCILLATION: ");

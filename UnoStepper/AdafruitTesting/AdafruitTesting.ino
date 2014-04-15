@@ -25,7 +25,7 @@ void setup() {
   AFMS.begin();
   
   // Stepper Motor
-  myMotor->setSpeed(2000);
+  myMotor->setSpeed(20000);
   
   // Servo Motor
   servo.attach(10);
@@ -41,9 +41,9 @@ void loop() {
   if (Serial.available() > 0) {
     int inChar = Serial.read();
     if (inChar == 'l') {
-      myMotor->step(400, FORWARD, DOUBLE);
+      myMotor->step(400, FORWARD, INTERLEAVE);
     } else if (inChar == 'r') {
-      myMotor->step(400, BACKWARD, DOUBLE);
+      myMotor->step(400, BACKWARD, INTERLEAVE);
     }
   }  
   //myMotor->step(100, FORWARD, DOUBLE);
@@ -53,9 +53,9 @@ void loop() {
 }
 
 void forwardStep() {
-  myMotor->step(1, FORWARD, DOUBLE);
+  myMotor->step(1, FORWARD, INTERLEAVE);
 }
 
 void backwardStep() {
-  myMotor->step(1, BACKWARD, DOUBLE);
+  myMotor->step(1, BACKWARD, INTERLEAVE);
 }
