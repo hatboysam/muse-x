@@ -11,8 +11,9 @@
 /** 
  * Servo motor control 
  **/
-Servo servo1;
-int servopin = A0;
+Servo servo1, servo2;
+int servopin1 = 9;
+int servopin2 = 10;
 
 /**
  * Stepper Control
@@ -64,7 +65,16 @@ void setup() {
   stepper.setAcceleration(motorAccel);
   
   // Set up servo
-  servo1.attach(14);
+  servo1.attach(servopin1);
+  servo2.attach(servopin2);
+  
+  // Test
+  if (servo1.attached()) {
+    Serial.println("Servo 1 Ready");
+  }
+  if (servo1.attached()) {
+    Serial.println("Servo 2 Ready");
+  }
   
   // Go home
   stepper.moveTo(0);
@@ -79,47 +89,22 @@ void loop() {
   currPhone = digitalRead(phonepin);
   if (currPhone == LOW && prevPhone == HIGH) {
     Serial.println("SLAP DA BUTTON");
-    moveRevs(2.0);
+    moveRevs(1.5);
   }
   
   // Take serial input
   if (Serial.available() > 0) {
-    inChar = Serial.read();
-    if (inChar == 's') {
-      // Start or stop motion
-      paused = !paused;
-      Serial.print("Moving: ");
-      Serial.println(!paused);
-    } else if (inChar == 'h') {
-      // Go home
-      stepper.moveTo(0);
-    } else if (inChar == 'l') {
-      // Move left
-      stepperDirection = 1;
-      moveRevs(2.0);
-    } else if (inChar == 'r') {
-      // Move right
-      stepperDirection = -1;
-      moveRevs(2.0);        
-    } else if (inChar == 'o') {
-      oscillate = !oscillate;
-      Serial.print("TOGGLE OSCILLATION: ");
-      Serial.println(oscillate);
-    }
+    dispatchInput();
   }
   
   // Switch the direction every so often
   currentMillis = millis();
   if (!paused) {
     if (oscillate && stepperDone()) {
+      // Switch stepper direction
       stepperDirection = -1 * stepperDirection;
       // Move the pick
-      if (stepperDirection < 0) {
-        servo1.write(90);
-      } else {
-        servo1.write(0);
-      }
-      moveRevs(2);  
+      moveRevs(1.5);  
     }
   
     // Must be called as often as possible
@@ -127,6 +112,37 @@ void loop() {
   }
 }
 
+/**
+ * Handle input logic
+ */
+void dispatchInput() {
+  inChar = Serial.read();
+  if (inChar == 's') {
+    // Start or stop motion
+    paused = !paused;
+    Serial.print("Moving: ");
+    Serial.println(!paused);
+  } else if (inChar == 'h') {
+    // Go home
+    stepper.moveTo(0);
+  } else if (inChar == 'l') {
+    // Move left
+    stepperDirection = 1;
+    moveRevs(1.5);
+  } else if (inChar == 'r') {
+    // Move right
+    stepperDirection = -1;
+    moveRevs(1.5); 
+  } else if (inChar == 'o') {
+    oscillate = !oscillate;
+    Serial.print("TOGGLE OSCILLATION: ");
+    Serial.println(oscillate);
+  }
+}
+
+/**
+ * Check if the stepper is done moving
+ */
 boolean stepperDone() {
   return (stepper.distanceToGo() == 0.0); 
 }
@@ -146,3 +162,10 @@ void switchStepper() {
     prevMillis = currentMillis;  
 }
 
+/**
+ * Move both servos
+ */
+void moveServos(int angle) {
+  servo1.write(angle);
+  servo2.write(angle);
+}
