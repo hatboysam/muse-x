@@ -12,15 +12,16 @@
  * Servo motor control 
  **/
 Servo servo1, servo2;
-int servopin1 = 9;
-int servopin2 = 10;
+int servopin1 = 10;
+int servopin2 = 11;
+int servoAngle = 90;
 
 /**
  * Stepper Control
  */
 int dirpin = 2;                   // Direction pin
 int steppin = 3;                  // Stepping pin
-int stepperDirection = 1;      // Direction
+int stepperDirection = 1;         // Direction
 
 /**
  * AccelStepper Control
@@ -54,32 +55,24 @@ boolean oscillate = false;
 void setup() { 
   Serial.begin(9600);
   
-  // Pin setup
+  // SERVO: Set up
+  servo1.attach(servopin1);
+  servo2.attach(servopin2);
+  
+  // STEPER: Set up pins
   pinMode(dirpin, OUTPUT);     
   pinMode(steppin, OUTPUT);
   
-  // Set up the stepper
+  // STEPPER: Set up speeds
   digitalWrite(dirpin, stepperDirection);
   stepper.setMaxSpeed(motorSpeed);
   stepper.setSpeed(motorSpeed);
   stepper.setAcceleration(motorAccel);
   
-  // Set up servo
-  servo1.attach(servopin1);
-  servo2.attach(servopin2);
-  
-  // Test
-  if (servo1.attached()) {
-    Serial.println("Servo 1 Ready");
-  }
-  if (servo1.attached()) {
-    Serial.println("Servo 2 Ready");
-  }
-  
-  // Go home
+  // STEPPER: Go home
   stepper.moveTo(0);
   
-  // Phone
+  // PHONEJACK: Set up
   pinMode(phonepin, INPUT_PULLUP);
 }
 
@@ -109,6 +102,9 @@ void loop() {
   
     // Must be called as often as possible
     stepper.run();  
+    
+    // Keep servos in position
+    moveServos(servoAngle);
   }
 }
 
@@ -134,9 +130,17 @@ void dispatchInput() {
     stepperDirection = -1;
     moveRevs(1.5); 
   } else if (inChar == 'o') {
+    // Turn oscillation on/off
     oscillate = !oscillate;
     Serial.print("TOGGLE OSCILLATION: ");
     Serial.println(oscillate);
+  } else if (inChar == 'p') {    
+    // Switch the servo angle
+    if (servoAngle == 90) {
+      servoAngle = 0;
+    } else {
+      servoAngle = 90;
+    }
   }
 }
 
@@ -166,6 +170,6 @@ void switchStepper() {
  * Move both servos
  */
 void moveServos(int angle) {
-  servo1.write(angle);
+  servo1.write(180 - angle);
   servo2.write(angle);
 }
