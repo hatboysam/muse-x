@@ -12,9 +12,11 @@
  * Servo motor control 
  **/
 Servo servo1, servo2;
-int servopin1 = 10;
-int servopin2 = 11;
-int servoAngle = 90;
+int servopin1 = 11;
+int servopin2 = 10;
+int UPANGLE = 100;
+int DOWNANGLE = 70;
+int servoAngle = UPANGLE;
 
 /**
  * Stepper Control
@@ -74,6 +76,8 @@ void setup() {
   
   // PHONEJACK: Set up
   pinMode(phonepin, INPUT_PULLUP);
+  
+  Serial.println("READY TO BEGIN");
 }
 
 void loop() { 
@@ -96,6 +100,10 @@ void loop() {
     if (oscillate && stepperDone()) {
       // Switch stepper direction
       stepperDirection = -1 * stepperDirection;
+      
+      // Pick up or down
+      switchServos();
+      
       // Move the pick
       moveRevs(1.5);  
     }
@@ -136,11 +144,7 @@ void dispatchInput() {
     Serial.println(oscillate);
   } else if (inChar == 'p') {    
     // Switch the servo angle
-    if (servoAngle == 90) {
-      servoAngle = 0;
-    } else {
-      servoAngle = 90;
-    }
+    switchServos();
   }
 }
 
@@ -172,4 +176,12 @@ void switchStepper() {
 void moveServos(int angle) {
   servo1.write(180 - angle);
   servo2.write(angle);
+}
+
+void switchServos() {
+  if (servoAngle == UPANGLE){
+    servoAngle = DOWNANGLE;
+  } else {
+    servoAngle = UPANGLE;
+  } 
 }
