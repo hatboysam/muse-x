@@ -1,6 +1,8 @@
 #include <AccelStepper.h>
 #include <Servo.h>
 
+#include "ServoRange.h"
+
 /**
  * Phone Jack
  */
@@ -10,11 +12,11 @@ int phonepin = 9;
  * Servo motor control 
  **/
 Servo servo1, servo2;
+ServoRange range1, range2;
 int servopin1 = 11;
 int servopin2 = 10;
 int fPin1 = A1;
 int fPin2 = A2;
-
 int UPANGLE = 100;
 int DOWNANGLE = 70;
 int servoAngle = HIGH;
@@ -41,7 +43,7 @@ int ONE_REV = 1600;
 /**
  * Beat Tracking
  */
-int beats[] = {0, 1, 1, 1, 1};
+int beats[] = {0, 1, 1, 1, 0};
 int currBeat = 1;
 
 /**
@@ -60,6 +62,12 @@ void setup() {
   // SERVO: Set up
   servo1.attach(servopin1);
   servo2.attach(servopin2);
+  pinMode(fPin1, INPUT);
+  pinMode(fPin2, INPUT);
+  range1.minDegrees = 180 - DOWNANGLE;
+  range1.maxDegrees = 180 - UPANGLE;
+  range2.minDegrees = DOWNANGLE;
+  range2.maxDegrees = UPANGLE;
   
   // STEPER: Set up pins
   pinMode(dirpin, OUTPUT);     
@@ -108,9 +116,9 @@ void loop() {
       
       // Move the servo
       if (beats[currBeat] == 1) {
-        pickUp();
-      } else {
         pickDown();
+      } else {
+        pickUp();
       }
       
       // Move the pick one strum in the new direction
@@ -160,7 +168,7 @@ void dispatchInput() {
     switchServos();
   } else if (inChar == 'c') {
     // Calibrate servo motors
-    // TODO: Calibrate
+    calibrationRoutine();
   } else {
     // Don't know what it is
     Serial.println("Error: Unknown input.");
@@ -191,25 +199,32 @@ void beatSwitch(int ind, int on) {
 /**
  * Move both servos
  */
-void moveServos(int angle) {
-  servo1.write(180 - angle);
-  servo2.write(angle);
+void moveServos() {
+  if (servoAngle == HIGH) {
+    servo1.write(range1.maxDegrees);
+    servo2.write(range2.maxDegrees);
+  } else {
+    servo1.write(range1.minDegrees);
+    servo2.write(range2.minDegrees);
+  }
 }
 
 /**
  * Move the pick up
  */
 void pickUp() {
+  //Serial.println("UP");
   servoAngle = HIGH;
-  moveServos(UPANGLE);
+  moveServos();
 }
 
 /**
  * Move the pick down
  */
 void pickDown() {
+  //Serial.println("DOWN");
   servoAngle = LOW;
-  moveServos(DOWNANGLE);
+  moveServos();
 }
 
 void switchServos() {
@@ -218,4 +233,109 @@ void switchServos() {
   } else {
     servoAngle = HIGH;
   } 
+}
+
+/*********************************************************************************************************
+ ***************************** SERVO CALIBRATION CODE ****************************************************
+ ********************************************************************************************************/
+ 
+void calibrationRoutine() {
+  // Detach servos
+  servo1.detach();
+  servo2.detach();
+  
+  // Ask for user calibration
+  calibrateRange(&range1, fPin1, &range2, fPin2);
+  
+  // Attach servos again
+  servo1.attach(servopin1);
+  servo2.attach(servopin2);
+  
+  // Find angles
+  findAngles(&range1, servo1, fPin1);
+  findAngles(&range2, servo2, fPin2);
+  
+  // Tell user to put bar back in
+  Serial.println("Replace bar, then press OK");
+  while (Serial.available() < 1) {}
+  Serial.read();
+}
+ 
+void findAngles(ServoRange *range, Servo servo, int pin) {
+  Serial.print("Locating chosen angles...");
+  int tolerance = 2;
+  
+  // Make guesses
+  int minFeed = range->minFeedback;
+  int maxFeed = range->maxFeedback;
+  int lowAngle = 10;
+  int highAngle = 170;
+  
+  do {
+    lowAngle = lowAngle + 1;
+    servo.write(lowAngle);
+    delay(100);
+    
+  } while (abs(analogRead(pin) - minFeed) > tolerance);
+  
+  do {
+    highAngle = highAngle - 1;
+    servo.write(highAngle);
+    delay(100);
+    
+  } while (abs(analogRead(pin) - maxFeed) > tolerance);
+  
+  // Set and return
+  range->minDegrees = lowAngle;
+  range->maxDegrees = highAngle;
+  Serial.println("done.");
+}
+
+
+/**
+ * Calibrate the positions
+ */
+void calibrateRange(ServoRange *r1, int pin1, ServoRange *r2, int pin2) {
+ // Wait
+ Serial.println("Move to low position, then press OK");
+ while (Serial.available() < 1) {}
+ Serial.read();
+ 
+ // Read low voltages
+ int low1 = analogRead(pin1);
+ int low2 = analogRead(pin2);
+ 
+ // Wait
+ Serial.println("Move to high position, then press OK");
+ while (Serial.available() < 1) {}
+ Serial.read();
+ 
+ // Read high voltages
+ int high1 = analogRead(pin1);
+ int high2 = analogRead(pin2);
+ 
+ // Set
+ r1->minFeedback =low1;
+ r1->maxFeedback = high1;
+  
+ r2->minFeedback = low2;
+ r2->maxFeedback = high2;
+ 
+ // Wait
+ Serial.println("Remove bar to finish calibration, then press OK");
+ while (Serial.available() < 1) {}
+ Serial.read();
+}
+
+/**
+ * Debug
+ */
+void printRange(ServoRange* range) {
+  Serial.print(range->minDegrees);
+  Serial.print(" to ");
+  Serial.print(range->maxDegrees);
+  Serial.print(" = ");
+  Serial.print(range->minFeedback);
+  Serial.print(" to ");
+  Serial.println(range->maxFeedback);
 }
