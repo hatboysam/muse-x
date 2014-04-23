@@ -1,1 +1,12 @@
+# Mac
 .DS_Store
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+
+# Java
+*.class
+
+
