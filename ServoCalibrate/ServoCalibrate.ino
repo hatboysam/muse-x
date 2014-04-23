@@ -26,10 +26,10 @@ void setup() {
   findAngles(&range2, servo2, fPin2);
   
   // Show results
-  Serial.println("Servo 1:");
-  printRange(&range1);
-  Serial.println("Servo 2:");
-  printRange(&range2);
+  // Serial.println("Servo 1:");
+  // printRange(&range1);
+  // Serial.println("Servo 2:");
+  // printRange(&range2);
 }
 
 
@@ -54,30 +54,22 @@ void loop() {
  */
 void calibrateRange(ServoRange *r1, int pin1, ServoRange *r2, int pin2) {
  // Wait
- Serial.println("Move to low position, then enter any key");
+ Serial.println("Move to low position, then press OK");
  while (Serial.available() < 1) {}
  Serial.read();
  
  // Read low voltages
  int low1 = analogRead(pin1);
  int low2 = analogRead(pin2);
- Serial.print("S1 :");
- Serial.print(low1);
- Serial.print(", S2: ");
- Serial.println(low2);
  
  // Wait
- Serial.println("Move to high position, then enter any key");
+ Serial.println("Move to high position, then press OK");
  while (Serial.available() < 1) {}
  Serial.read();
  
  // Read high voltages
  int high1 = analogRead(pin1);
  int high2 = analogRead(pin2);
- Serial.print("S1 :");
- Serial.print(high1);
- Serial.print(", S2: ");
- Serial.println(high2);
  
  // Set
  r1->minFeedback = low1;
@@ -87,7 +79,7 @@ void calibrateRange(ServoRange *r1, int pin1, ServoRange *r2, int pin2) {
  r2->maxFeedback = high2;
  
  // Wait
- Serial.println("Remove bar to finish calibration");
+ Serial.println("Remove bar to finish calibration, then press OK");
  while (Serial.available() < 1) {}
  Serial.read();
 }
@@ -146,13 +138,3 @@ void printRange(ServoRange* range) {
   Serial.print(" to ");
   Serial.println(range->maxFeedback);
 }
-
-void writeAngle(int a1, int a2) {
-  servo1.write(180 - a1);
-  servo2.write(a2);
-}
-
-int toAngle(int voltage) {
-  return map(voltage, 0, 1023, 0, 180);
-}
-

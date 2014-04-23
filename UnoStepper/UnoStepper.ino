@@ -12,6 +12,9 @@ int phonepin = 9;
 Servo servo1, servo2;
 int servopin1 = 11;
 int servopin2 = 10;
+int fPin1 = A1;
+int fPin2 = A2;
+
 int UPANGLE = 100;
 int DOWNANGLE = 70;
 int servoAngle = HIGH;
@@ -143,11 +146,11 @@ void dispatchInput() {
     stepper.moveTo(0);
   } else if (inChar == 'l') {
     // Move left
-    stepperDirection = 1;
+    stepperDirection = -1;
     moveRevs(0.1);
   } else if (inChar == 'r') {
     // Move right
-    stepperDirection = -1;
+    stepperDirection = 1;
     moveRevs(0.1); 
   } else if (inChar == 'o') {
     // Turn oscillation on/off
