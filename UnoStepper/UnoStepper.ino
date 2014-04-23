@@ -1,12 +1,10 @@
-#include <Adafruit_MotorShield.h>
-#include <Wire.h>
 #include <AccelStepper.h>
 #include <Servo.h>
 
 /**
  * Phone Jack
  */
- int phonepin = 9;
+int phonepin = 9;
 
 /** 
  * Servo motor control 
@@ -16,7 +14,7 @@ int servopin1 = 11;
 int servopin2 = 10;
 int UPANGLE = 100;
 int DOWNANGLE = 70;
-int servoAngle = UPANGLE;
+int servoAngle = HIGH;
 
 /**
  * Stepper Control
@@ -29,30 +27,29 @@ int stepperDirection = 1;         // Direction
  * AccelStepper Control
  */
 AccelStepper stepper(1, steppin, dirpin);
- 
-/**
- * Stepper Timing
- */
-int prevMillis = 0;
-int currentMillis = 0;
 
 /**
  * Stepper Constants
  */
-int SWITCH_INTERVAL_MS = 1000;
 int motorSpeed = 40000; // Steps per second
 int motorAccel = 90000;
 int ONE_REV = 1600;
 
 /**
+ * Beat Tracking
+ */
+int beats[] = {0, 1, 1, 1, 1};
+int currBeat = 1;
+
+/**
  * Other
  */
- int inChar;
- int prevPhone = LOW;
- int currPhone = LOW;
-
+int inChar;
+int prevPhone = LOW;
+int currPhone = LOW;
 boolean paused = false;
 boolean oscillate = false;
+boolean singleOscillate = false;
 
 void setup() { 
   Serial.begin(9600);
@@ -85,8 +82,8 @@ void loop() {
   prevPhone = currPhone;
   currPhone = digitalRead(phonepin);
   if (currPhone == LOW && prevPhone == HIGH) {
-    Serial.println("SLAP DA BUTTON");
-    moveRevs(1.5);
+    Serial.println("Button press registered.");
+    singleOscillate = true;
   }
   
   // Take serial input
@@ -94,25 +91,41 @@ void loop() {
     dispatchInput();
   }
   
-  // Switch the direction every so often
-  currentMillis = millis();
+  // Move everything, if not paused
   if (!paused) {
-    if (oscillate && stepperDone()) {
+    if ((oscillate || singleOscillate) && stepperDone()) {
       // Switch stepper direction
       stepperDirection = -1 * stepperDirection;
       
-      // Pick up or down
-      switchServos();
+      // Change the beat
+      currBeat = currBeat + 1;
+      if (currBeat > 4) {
+        currBeat = 1;
+      }
       
-      // Move the pick
+      // Move the servo
+      if (beats[currBeat] == 1) {
+        pickUp();
+      } else {
+        pickDown();
+      }
+      
+      // Move the pick one strum in the new direction
       moveRevs(1.5);  
+      
+      // End single oscillation, always
+      singleOscillate = false;
     }
   
     // Must be called as often as possible
     stepper.run();  
     
     // Keep servos in position
-    // moveServos(servoAngle);
+    if (servoAngle == HIGH) {
+      pickUp();
+    } else {
+      pickDown();
+    }
   }
 }
 
@@ -125,8 +138,6 @@ void dispatchInput() {
   if (inChar == 's') {
     // Start or stop motion
     paused = !paused;
-    Serial.print("Moving: ");
-    Serial.println(!paused);
   } else if (inChar == 'h') {
     // Go home
     stepper.moveTo(0);
@@ -144,6 +155,12 @@ void dispatchInput() {
   } else if (inChar == 'p') {    
     // Switch the servo angle
     switchServos();
+  } else if (inChar == 'c') {
+    // Calibrate servo motors
+    // TODO: Calibrate
+  } else {
+    // Don't know what it is
+    Serial.println("Error: Unknown input.");
   }
 }
 
@@ -162,11 +179,10 @@ void moveRevs(float revs) {
 }
 
 /**
- * Switch the direction of the stepper
+ * Turn a beat on or off
  */
-void switchStepper() {
-    stepperDirection = -1 * stepperDirection;
-    prevMillis = currentMillis;  
+void beatSwitch(int ind, int on) {
+   beats[ind] = on; 
 }
 
 /**
@@ -177,10 +193,26 @@ void moveServos(int angle) {
   servo2.write(angle);
 }
 
+/**
+ * Move the pick up
+ */
+void pickUp() {
+  servoAngle = HIGH;
+  moveServos(UPANGLE);
+}
+
+/**
+ * Move the pick down
+ */
+void pickDown() {
+  servoAngle = LOW;
+  moveServos(DOWNANGLE);
+}
+
 void switchServos() {
-  if (servoAngle == UPANGLE){
-    servoAngle = DOWNANGLE;
+  if (servoAngle == HIGH){
+    servoAngle = LOW;
   } else {
-    servoAngle = UPANGLE;
+    servoAngle = HIGH;
   } 
 }

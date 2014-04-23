@@ -36,6 +36,7 @@ public class MuseXGUI implements SerialPortEventListener {
         frame.pack();
         frame.setVisible(true);
 
+        // Make sure Arduino connection closes on window exit
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent windowEvent) {
@@ -44,7 +45,7 @@ public class MuseXGUI implements SerialPortEventListener {
             }
         });
 
-        // Autoscroll
+        // Set up auto-scroll for output pane
         DefaultCaret caret = (DefaultCaret) textArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
@@ -62,7 +63,6 @@ public class MuseXGUI implements SerialPortEventListener {
 
         // Set up buttons
         buttonSetup();
-
     }
 
     public void buttonSetup() {
@@ -72,17 +72,16 @@ public class MuseXGUI implements SerialPortEventListener {
 
         // Start and stop
         playButton.addActionListener(new StringSender("o", ac));
+
+        // Calibration
+        calibrateButton.addActionListener(new StringSender("c", ac));
+        OKButton.addActionListener(new StringSender("k", ac));
     }
 
     public void writeOutput(String msg) {
+        // Write a string to the output panel
         String currentText = textArea.getText();
         textArea.setText(currentText + "\n" + msg);
-    }
-
-    public static void main(String[] args) {
-        // Setup the frame
-        JFrame frame = new JFrame(CLASS_NAME);
-        MuseXGUI museXGUI = new MuseXGUI(frame);
     }
 
     @Override
@@ -95,6 +94,15 @@ public class MuseXGUI implements SerialPortEventListener {
         }
     }
 
+    public static void main(String[] args) {
+        // Setup the frame
+        JFrame frame = new JFrame(CLASS_NAME);
+        MuseXGUI museXGUI = new MuseXGUI(frame);
+    }
+
+    /**
+     * Button Listener that sends a String to Arduino.
+     */
     private static class StringSender implements ActionListener {
         private String string;
         private ArduinoConnection ac;
