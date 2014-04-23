@@ -112,7 +112,7 @@ void loop() {
     stepper.run();  
     
     // Keep servos in position
-    moveServos(servoAngle);
+    // moveServos(servoAngle);
   }
 }
 
@@ -121,6 +121,7 @@ void loop() {
  */
 void dispatchInput() {
   inChar = Serial.read();
+  // Serial.println(inChar);
   if (inChar == 's') {
     // Start or stop motion
     paused = !paused;
@@ -132,16 +133,14 @@ void dispatchInput() {
   } else if (inChar == 'l') {
     // Move left
     stepperDirection = 1;
-    moveRevs(1.5);
+    moveRevs(0.1);
   } else if (inChar == 'r') {
     // Move right
     stepperDirection = -1;
-    moveRevs(1.5); 
+    moveRevs(0.1); 
   } else if (inChar == 'o') {
     // Turn oscillation on/off
     oscillate = !oscillate;
-    Serial.print("TOGGLE OSCILLATION: ");
-    Serial.println(oscillate);
   } else if (inChar == 'p') {    
     // Switch the servo angle
     switchServos();

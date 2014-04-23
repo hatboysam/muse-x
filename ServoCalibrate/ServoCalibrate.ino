@@ -35,13 +35,17 @@ void setup() {
 
 void loop() {
   // Write to high
-  servo1.write(range1.maxDegrees);
+  servo1.write(range1.minDegrees);
   servo2.write(range2.minDegrees);
+  //servo1.write(120);
+  //servo2.write(60);
   delay(1000);
   
   // Write to low
-  servo1.write(range2.minDegrees);
+  servo1.write(range1.maxDegrees);
   servo2.write(range2.maxDegrees);
+  //servo1.write(60);
+  //servo2.write(120);
   delay(1000);
 }
 
@@ -57,6 +61,10 @@ void calibrateRange(ServoRange *r1, int pin1, ServoRange *r2, int pin2) {
  // Read low voltages
  int low1 = analogRead(pin1);
  int low2 = analogRead(pin2);
+ Serial.print("S1 :");
+ Serial.print(low1);
+ Serial.print(", S2: ");
+ Serial.println(low2);
  
  // Wait
  Serial.println("Move to high position, then enter any key");
@@ -66,6 +74,10 @@ void calibrateRange(ServoRange *r1, int pin1, ServoRange *r2, int pin2) {
  // Read high voltages
  int high1 = analogRead(pin1);
  int high2 = analogRead(pin2);
+ Serial.print("S1 :");
+ Serial.print(high1);
+ Serial.print(", S2: ");
+ Serial.println(high2);
  
  // Set
  r1->minFeedback = low1;
