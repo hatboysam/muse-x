@@ -26,6 +26,8 @@ public class MuseXGUI implements SerialPortEventListener {
     private JPanel formPanel;
     private JScrollPane scrollPane;
     private JTextArea textArea;
+    private JButton upPickButton;
+    private JButton downPickButton;
 
     private ArduinoConnection ac;
 
@@ -76,6 +78,8 @@ public class MuseXGUI implements SerialPortEventListener {
         // Calibration
         calibrateButton.addActionListener(new StringSender("c", ac));
         OKButton.addActionListener(new StringSender("k", ac));
+        upPickButton.addActionListener(new StringSender("u", ac));
+        downPickButton.addActionListener(new StringSender("d", ac));
     }
 
     public void writeOutput(String msg) {
@@ -95,6 +99,9 @@ public class MuseXGUI implements SerialPortEventListener {
     }
 
     public static void main(String[] args) {
+        // Load the library
+        // TODO
+
         // Setup the frame
         JFrame frame = new JFrame(CLASS_NAME);
         MuseXGUI museXGUI = new MuseXGUI(frame);

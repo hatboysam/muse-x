@@ -3,4 +3,5 @@ typedef struct {
 	int maxDegrees;
 	int minFeedback;
 	int maxFeedback;
+	int sign;
 } ServoRange;

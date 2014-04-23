@@ -1,21 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.musex.musex.MuseXGUI">
-  <grid id="27dc6" binding="formPanel" layout-manager="GridLayoutManager" row-count="8" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="formPanel" layout-manager="GridLayoutManager" row-count="8" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="20" y="20" width="691" height="400"/>
+      <xy x="20" y="20" width="890" height="400"/>
     </constraints>
     <properties/>
     <border type="none"/>
     <children>
-      <component id="99198" class="javax.swing.JButton" binding="rightButton" default-binding="true">
-        <constraints>
-          <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Right &gt;"/>
-        </properties>
-      </component>
       <component id="a541c" class="javax.swing.JCheckBox" binding="beat1CheckBox" default-binding="true">
         <constraints>
           <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -131,6 +123,30 @@
         </constraints>
         <properties>
           <text value="&lt; Left"/>
+        </properties>
+      </component>
+      <component id="99198" class="javax.swing.JButton" binding="rightButton" default-binding="true">
+        <constraints>
+          <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Right &gt;"/>
+        </properties>
+      </component>
+      <component id="4ee1b" class="javax.swing.JButton" binding="upPickButton" default-binding="true">
+        <constraints>
+          <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Up (Pick)"/>
+        </properties>
+      </component>
+      <component id="12af8" class="javax.swing.JButton" binding="downPickButton" default-binding="true">
+        <constraints>
+          <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Down(Pick)"/>
         </properties>
       </component>
     </children>

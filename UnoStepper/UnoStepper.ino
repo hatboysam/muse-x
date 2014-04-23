@@ -17,8 +17,8 @@ int servopin1 = 11;
 int servopin2 = 10;
 int fPin1 = A1;
 int fPin2 = A2;
-int UPANGLE = 100;
-int DOWNANGLE = 70;
+int UPANGLE = 40;
+int DOWNANGLE = 20;
 int servoAngle = HIGH;
 
 /**
@@ -44,7 +44,7 @@ int ONE_REV = 1600;
  * Beat Tracking
  */
 int beats[] = {0, 1, 1, 1, 0};
-int currBeat = 1;
+int currBeat = 0;
 
 /**
  * Other
@@ -66,8 +66,10 @@ void setup() {
   pinMode(fPin2, INPUT);
   range1.minDegrees = 180 - DOWNANGLE;
   range1.maxDegrees = 180 - UPANGLE;
+  range1.sign = 1;
   range2.minDegrees = DOWNANGLE;
   range2.maxDegrees = UPANGLE;
+  range2.sign = 1;
   
   // STEPER: Set up pins
   pinMode(dirpin, OUTPUT);     
@@ -82,6 +84,9 @@ void setup() {
   // STEPPER: Go home
   stepper.moveTo(0);
   
+  // SERVO: Go home
+  pickDown();
+   
   // PHONEJACK: Set up
   pinMode(phonepin, INPUT_PULLUP);
   
@@ -155,11 +160,11 @@ void dispatchInput() {
   } else if (inChar == 'l') {
     // Move left
     stepperDirection = -1;
-    moveRevs(0.1);
+    moveRevs(0.2);
   } else if (inChar == 'r') {
     // Move right
     stepperDirection = 1;
-    moveRevs(0.1); 
+    moveRevs(0.2); 
   } else if (inChar == 'o') {
     // Turn oscillation on/off
     oscillate = !oscillate;
@@ -169,6 +174,16 @@ void dispatchInput() {
   } else if (inChar == 'c') {
     // Calibrate servo motors
     calibrationRoutine();
+  } else if (inChar == 'u') {
+    // Raise both servos one two degrees
+    range1.minDegrees = range1.minDegrees + (range1.sign * 2);
+    range2.minDegrees = range2.minDegrees + (range2.sign * 2);
+    Serial.println("Raised.");
+  } else if (inChar == 'd') {
+    // Lower both servos one two degrees
+    range1.minDegrees = range1.minDegrees - (range1.sign * 2);
+    range2.minDegrees = range2.minDegrees - (range2.sign * 2);
+    Serial.println("Lowered");
   } else {
     // Don't know what it is
     Serial.println("Error: Unknown input.");
@@ -321,10 +336,27 @@ void calibrateRange(ServoRange *r1, int pin1, ServoRange *r2, int pin2) {
  r2->minFeedback = low2;
  r2->maxFeedback = high2;
  
+ // Sign (servo may operate "backwards")
+ if (low1 > high1) {
+   r1->sign = -1;
+ } else {
+   r1->sign = 1;
+ }
+ 
+ if (low2 > high2) {
+   r2->sign = -1;
+ } else {
+   r2->sign = 1;
+ }
+ 
  // Wait
  Serial.println("Remove bar to finish calibration, then press OK");
  while (Serial.available() < 1) {}
  Serial.read();
+ 
+ // TODO: Remove debug
+ printRange(&range1);
+ printRange(&range2);
 }
 
 /**
