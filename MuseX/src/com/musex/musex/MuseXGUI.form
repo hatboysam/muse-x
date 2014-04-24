@@ -149,6 +149,38 @@
           <text value="Down(Pick)"/>
         </properties>
       </component>
+      <component id="ebd13" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Button Action:"/>
+        </properties>
+      </component>
+      <component id="74f92" class="javax.swing.JRadioButton" binding="singleStrumRadioButton" default-binding="true">
+        <constraints>
+          <grid row="4" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Single Strum"/>
+        </properties>
+      </component>
+      <component id="fd37" class="javax.swing.JRadioButton" binding="oneMeasureRadioButton" default-binding="true">
+        <constraints>
+          <grid row="5" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="One Measure"/>
+        </properties>
+      </component>
+      <component id="e88f5" class="javax.swing.JRadioButton" binding="infiniteOnOffRadioButton" default-binding="true">
+        <constraints>
+          <grid row="6" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Infinite On/Off"/>
+        </properties>
+      </component>
     </children>
   </grid>
 </form>

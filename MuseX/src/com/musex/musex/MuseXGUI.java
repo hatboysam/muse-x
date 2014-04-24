@@ -28,6 +28,9 @@ public class MuseXGUI implements SerialPortEventListener {
     private JTextArea textArea;
     private JButton upPickButton;
     private JButton downPickButton;
+    private JRadioButton singleStrumRadioButton;
+    private JRadioButton oneMeasureRadioButton;
+    private JRadioButton infiniteOnOffRadioButton;
 
     private ArduinoConnection ac;
 
@@ -69,6 +72,13 @@ public class MuseXGUI implements SerialPortEventListener {
         beat3CheckBox.setSelected(true);
         beat4CheckBox.setSelected(false);
 
+        // Radio buttons
+        ButtonGroup group = new ButtonGroup();
+        group.add(singleStrumRadioButton);
+        group.add(oneMeasureRadioButton);
+        group.add(infiniteOnOffRadioButton);
+        singleStrumRadioButton.setSelected(true);
+
         // Set up buttons
         buttonSetup();
     }
@@ -92,6 +102,11 @@ public class MuseXGUI implements SerialPortEventListener {
         beat2CheckBox.addItemListener(new CheckboxStringSender("b21", "b20", ac));
         beat3CheckBox.addItemListener(new CheckboxStringSender("b31", "b30", ac));
         beat4CheckBox.addItemListener(new CheckboxStringSender("b41", "b40", ac));
+
+        // Checkboxes
+        singleStrumRadioButton.addItemListener(new CheckboxStringSender("m1", "", ac));
+        oneMeasureRadioButton.addItemListener(new CheckboxStringSender("m2", "", ac));
+        infiniteOnOffRadioButton.addItemListener(new CheckboxStringSender("m3", "", ac));
     }
 
     public void writeOutput(String msg) {
@@ -111,9 +126,6 @@ public class MuseXGUI implements SerialPortEventListener {
     }
 
     public static void main(String[] args) {
-        // Load the library
-        // TODO
-
         // Setup the frame
         JFrame frame = new JFrame(CLASS_NAME);
         MuseXGUI museXGUI = new MuseXGUI(frame);

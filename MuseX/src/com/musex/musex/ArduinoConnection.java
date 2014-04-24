@@ -144,18 +144,4 @@ public class ArduinoConnection implements SerialPortEventListener {
             return null;
         }
     }
-
-    public static void main(String[] args) {
-        // TODO: Use or move
-
-        // Open and Connect
-        ArduinoConnection ac = new ArduinoConnection();
-        ac.connectToBoard();
-
-        // Try sending a message
-        ac.sendString("p");
-
-        // Close the connection
-        ac.close();
-    }
 }

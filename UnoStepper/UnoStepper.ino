@@ -41,8 +41,8 @@ int ONE_REV = 1600;
 /**
  * Beat Tracking
  */
-int beats[] = {0, 1, 1, 1, 0};
-int currBeat = 0;
+int beats[] = {0, 1, 1, 1, 0}; // 1-indexed
+int currBeat = 1;
 
 /**
  * Other
@@ -52,7 +52,8 @@ int prevPhone = LOW;
 int currPhone = LOW;
 boolean paused = false;
 boolean oscillate = false;
-boolean singleOscillate = false;
+int oscillateCount = 0;
+int buttonMode = 1;
 
 void setup() { 
   Serial.begin(9600);
@@ -99,7 +100,16 @@ void loop() {
   currPhone = digitalRead(phonepin);
   if (currPhone == LOW && prevPhone == HIGH) {
     Serial.println("Button press registered.");
-    singleOscillate = true;
+    if (buttonMode == 1) {
+      // Single strum
+      oscillateCount = 1;
+    } else if (buttonMode == 2) {
+      // One measure
+      oscillateCount = 4;
+    } else if (buttonMode == 3) {
+      // Infinite on/off
+      oscillate = !oscillate;
+    }
   }
   
   // Take serial input
@@ -109,12 +119,10 @@ void loop() {
   
   // Move everything, if not paused
   if (!paused) {
-    if ((oscillate || singleOscillate) && stepperDone()) {
+    if ((oscillate || (oscillateCount > 0)) && stepperDone()) {
       // Switch stepper direction
       stepperDirection = -1 * stepperDirection;
       
-      // Change the beat
-      currBeat = currBeat + 1;
       if (currBeat > 4) {
         currBeat = 1;
       }
@@ -129,8 +137,11 @@ void loop() {
       // Move the pick one strum in the new direction
       moveRevs(1.5);  
       
-      // End single oscillation, always
-      singleOscillate = false;
+      // Reduce single oscillation, always
+      oscillateCount = max(oscillateCount - 1, 0);
+      
+      // Change the beat
+      currBeat = currBeat + 1;
     }
   
     // Must be called as often as possible
@@ -182,6 +193,9 @@ void dispatchInput() {
   } else if (inChar == 'b') {
     // Change the beat pattern
     readBeatChange();
+  } else if (inChar == 'm') {
+    // Change the button action
+    readButtonMode();
   } else if (inChar == 'd') {
     // Lower both servos one two degrees
     range1.minDegrees = range1.minDegrees - (range1.sign * 2);
@@ -228,6 +242,22 @@ void readBeatChange() {
   int beatStatus = Serial.read() - '0';
   beatSwitch(beatNum, beatStatus); 
 }
+
+void readButtonMode() {
+  // Wait for it
+  int startMillis = millis();
+  while (Serial.available() < 1) {
+    if ((millis() - startMillis) > 4000) {
+      // Give up after 4 seconds
+      Serial.println("Error: bad input");
+      return;
+    }
+  };
+  
+  // Read
+  buttonMode = Serial.read() - '0';
+}
+      
 
 /**
  * Turn a beat on or off
