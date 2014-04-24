@@ -17,8 +17,6 @@ int servopin1 = 11;
 int servopin2 = 10;
 int fPin1 = A1;
 int fPin2 = A2;
-int UPANGLE = 40;
-int DOWNANGLE = 20;
 int servoAngle = HIGH;
 
 /**
@@ -64,11 +62,13 @@ void setup() {
   servo2.attach(servopin2);
   pinMode(fPin1, INPUT);
   pinMode(fPin2, INPUT);
-  range1.minDegrees = 180 - DOWNANGLE;
-  range1.maxDegrees = 180 - UPANGLE;
-  range1.sign = 1;
-  range2.minDegrees = DOWNANGLE;
-  range2.maxDegrees = UPANGLE;
+  
+  // SERVO: Empirical initialization
+  range1.minDegrees = 172;
+  range1.maxDegrees = 163;
+  range1.sign = -1;
+  range2.minDegrees = 29;
+  range2.maxDegrees = 36;
   range2.sign = 1;
   
   // STEPER: Set up pins
@@ -179,6 +179,9 @@ void dispatchInput() {
     range1.minDegrees = range1.minDegrees + (range1.sign * 2);
     range2.minDegrees = range2.minDegrees + (range2.sign * 2);
     Serial.println("Raised.");
+  } else if (inChar == 'b') {
+    // Change the beat pattern
+    readBeatChange();
   } else if (inChar == 'd') {
     // Lower both servos one two degrees
     range1.minDegrees = range1.minDegrees - (range1.sign * 2);
@@ -186,7 +189,9 @@ void dispatchInput() {
     Serial.println("Lowered");
   } else {
     // Don't know what it is
-    Serial.println("Error: Unknown input.");
+    Serial.print("Error: Unknown input: ");
+    //char inString[] = { inChar };
+    Serial.println(inChar);
   }
 }
 
@@ -202,6 +207,26 @@ boolean stepperDone() {
  */
 void moveRevs(float revs) {
   stepper.move(revs * ONE_REV * stepperDirection);
+}
+
+/**
+ * Read a beat change from serial
+ */
+void readBeatChange() {
+  // Wait for it
+  int startMillis = millis();
+  while (Serial.available() < 2) {
+    if ((millis() - startMillis) > 4000) {
+      // Give up after 4 seconds
+      Serial.println("Error: bad input");
+      return;
+    }
+  };
+  
+  // Read
+  int beatNum = Serial.read() - '0';
+  int beatStatus = Serial.read() - '0';
+  beatSwitch(beatNum, beatStatus); 
 }
 
 /**
@@ -270,6 +295,10 @@ void calibrationRoutine() {
   findAngles(&range1, servo1, fPin1);
   findAngles(&range2, servo2, fPin2);
   
+  // Debug
+  printRange(&range1);
+  printRange(&range2);
+  
   // Tell user to put bar back in
   Serial.println("Replace bar, then press OK");
   while (Serial.available() < 1) {}
@@ -332,9 +361,13 @@ void calibrateRange(ServoRange *r1, int pin1, ServoRange *r2, int pin2) {
  // Set
  r1->minFeedback =low1;
  r1->maxFeedback = high1;
+ r1->minDegrees = toAngle(low1);
+ r1->maxDegrees = toAngle(high1);
   
  r2->minFeedback = low2;
  r2->maxFeedback = high2;
+ r2->minDegrees = toAngle(low2);
+ r2->maxDegrees = toAngle(high2);
  
  // Sign (servo may operate "backwards")
  if (low1 > high1) {
@@ -353,10 +386,6 @@ void calibrateRange(ServoRange *r1, int pin1, ServoRange *r2, int pin2) {
  Serial.println("Remove bar to finish calibration, then press OK");
  while (Serial.available() < 1) {}
  Serial.read();
- 
- // TODO: Remove debug
- printRange(&range1);
- printRange(&range2);
 }
 
 /**
@@ -370,4 +399,11 @@ void printRange(ServoRange* range) {
   Serial.print(range->minFeedback);
   Serial.print(" to ");
   Serial.println(range->maxFeedback);
+}
+
+/**
+ * Conversion
+ */
+int toAngle(int feed) {
+  return map(feed, 0, 1023, 0, 179);
 }

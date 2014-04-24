@@ -63,6 +63,12 @@ public class MuseXGUI implements SerialPortEventListener {
             writeOutput("Failed to connect Arduino.");
         }
 
+        // Checkbox start position
+        beat1CheckBox.setSelected(true);
+        beat2CheckBox.setSelected(true);
+        beat3CheckBox.setSelected(true);
+        beat4CheckBox.setSelected(false);
+
         // Set up buttons
         buttonSetup();
     }
@@ -80,6 +86,12 @@ public class MuseXGUI implements SerialPortEventListener {
         OKButton.addActionListener(new StringSender("k", ac));
         upPickButton.addActionListener(new StringSender("u", ac));
         downPickButton.addActionListener(new StringSender("d", ac));
+
+        // Beat selection
+        beat1CheckBox.addItemListener(new CheckboxStringSender("b11", "b10", ac));
+        beat2CheckBox.addItemListener(new CheckboxStringSender("b21", "b20", ac));
+        beat3CheckBox.addItemListener(new CheckboxStringSender("b31", "b30", ac));
+        beat4CheckBox.addItemListener(new CheckboxStringSender("b41", "b40", ac));
     }
 
     public void writeOutput(String msg) {
@@ -122,6 +134,28 @@ public class MuseXGUI implements SerialPortEventListener {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             ac.sendString(string);
+        }
+    }
+
+    private static class CheckboxStringSender implements ItemListener {
+
+        private String sChecked;
+        private String sUnchecked;
+        private ArduinoConnection ac;
+
+        private CheckboxStringSender(String sChecked, String sUnchecked, ArduinoConnection ac) {
+            this.sChecked = sChecked;
+            this.sUnchecked = sUnchecked;
+            this.ac = ac;
+        }
+
+        @Override
+        public void itemStateChanged(ItemEvent itemEvent) {
+            if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
+                ac.sendString(sChecked);
+            } else if(itemEvent.getStateChange() == ItemEvent.DESELECTED) {
+                ac.sendString(sUnchecked);
+            }
         }
     }
 }
