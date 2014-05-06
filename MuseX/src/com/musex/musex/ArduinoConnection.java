@@ -24,8 +24,8 @@ public class ArduinoConnection implements SerialPortEventListener {
             MAC_PORT_NAME_SER,
             WIN_PORT_NAME
     };
+    private static final String APP_NAME = ArduinoConnection.class.getSimpleName();
 
-    private static final String APP_NAME = "MuseX";
     private static final int TIME_OUT = 1000;
     private static final int DATA_RATE = 9600;
 
@@ -35,7 +35,6 @@ public class ArduinoConnection implements SerialPortEventListener {
     private OutputStream arduinoOutput;
 
     private BufferedReader inputReader;
-    private BufferedWriter outputWriter;
 
     public ArduinoConnection() {
         // Nothing to initialize
@@ -68,10 +67,6 @@ public class ArduinoConnection implements SerialPortEventListener {
             serialPort.setSerialPortParams(DATA_RATE, SerialPort.DATABITS_8,
                     SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
-            // add event listeners
-            // serialPort.addEventListener(this);
-            // serialPort.notifyOnDataAvailable(true);
-
             // Give the Arduino some time
             try {
                 Thread.sleep(2000);
@@ -83,9 +78,8 @@ public class ArduinoConnection implements SerialPortEventListener {
             arduinoInput = serialPort.getInputStream();
             arduinoOutput = serialPort.getOutputStream();
 
-            // Make readers
+            // Make reader
             inputReader = new BufferedReader(new InputStreamReader(arduinoInput));
-            outputWriter = new BufferedWriter(new OutputStreamWriter(arduinoOutput));
 
             return true;
         } catch (Exception e) {

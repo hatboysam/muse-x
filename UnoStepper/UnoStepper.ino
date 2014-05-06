@@ -230,11 +230,11 @@ void readBeatChange() {
   // Wait for it
   int startMillis = millis();
   while (Serial.available() < 2) {
-    if ((millis() - startMillis) > 4000) {
-      // Give up after 4 seconds
-      Serial.println("Error: bad input");
-      return;
-    }
+//    if ((millis() - startMillis) > 4000) {
+//      // Give up after 4 seconds
+//      Serial.println("Error: bad input");
+//      return;
+//    }
   };
   
   // Read
@@ -247,11 +247,11 @@ void readButtonMode() {
   // Wait for it
   int startMillis = millis();
   while (Serial.available() < 1) {
-    if ((millis() - startMillis) > 4000) {
-      // Give up after 4 seconds
-      Serial.println("Error: bad input");
-      return;
-    }
+//    if ((millis() - startMillis) > 4000) {
+//      // Give up after 4 seconds
+//      Serial.println("Error: bad input");
+//      return;
+//    }
   };
   
   // Read
